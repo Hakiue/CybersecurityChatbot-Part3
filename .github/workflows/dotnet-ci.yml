@@ -1,0 +1,38 @@
+name: .NET CI Build — Part 3
+
+on:
+  push:
+    branches: [ "main", "master", "develop" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    name: Build & Verify
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore CybersecurityChatbot.csproj
+
+      - name: Build (Release)
+        run: dotnet build CybersecurityChatbot.csproj --configuration Release --no-restore
+
+      - name: Verify build output
+        shell: pwsh
+        run: |
+          $exe = "bin/Release/net9.0-windows/CybersecurityChatbot.exe"
+          if (Test-Path $exe) {
+            Write-Host "✅ Build verified: $exe"
+          } else {
+            Write-Error "❌ Build output not found"
+            exit 1
+          }
