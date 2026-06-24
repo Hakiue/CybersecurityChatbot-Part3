@@ -5,6 +5,9 @@ using System.Text;
 
 namespace CybersecurityChatbot.Features
 {
+    /// <summary>Category used to colour-code log entries in the Activity Log tab.</summary>
+    public enum LogCategory { General, Task, Reminder, Quiz, Error }
+
     /// <summary>
     /// A single timestamped activity record.
     /// </summary>
@@ -12,6 +15,7 @@ namespace CybersecurityChatbot.Features
     {
         public DateTime Timestamp { get; set; } = DateTime.Now;
         public string Description { get; set; } = string.Empty;
+        public LogCategory Category { get; set; } = LogCategory.General;
 
         public override string ToString() => $"[{Timestamp:HH:mm:ss}] {Description}";
     }
@@ -33,10 +37,10 @@ namespace CybersecurityChatbot.Features
         /// <summary>Total number of actions logged this session.</summary>
         public int TotalCount => _entries.Count;
 
-        /// <summary>Records a new timestamped activity.</summary>
-        public void Add(string description)
+        /// <summary>Records a new timestamped activity with an optional category for colour-coding.</summary>
+        public void Add(string description, LogCategory category = LogCategory.General)
         {
-            _entries.Add(new LogEntry { Description = description, Timestamp = DateTime.Now });
+            _entries.Add(new LogEntry { Description = description, Timestamp = DateTime.Now, Category = category });
         }
 
         /// <summary>Returns the most recent entries, newest first (default: last 8).</summary>

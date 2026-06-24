@@ -94,6 +94,11 @@ namespace CybersecurityChatbot.GUI
         // ── Activity Log tab controls ─────────────────────────────────────────
         private RichTextBox _logDisplay = null!;
 
+        // ── Extra UX controls ─────────────────────────────────────────────────
+        private Label        _taskCountLabel  = null!;   // "2 of 5 complete" in Tasks header
+        private Label        _charCountLabel  = null!;   // character counter on input box
+        private ProgressBar  _quizScoreBar    = null!;   // score progress bar in Quiz tab
+
         // ─────────────────────────────────────────────────────────────────────
         public MainForm()
         {
@@ -117,8 +122,15 @@ namespace CybersecurityChatbot.GUI
 
             _activityLogger = (activity) =>
             {
-                // Record in the persistent activity log AND mirror to the status bar.
-                _activityLog.Add(activity);
+                // Auto-detect category from description keywords for colour-coding.
+                LogCategory cat = LogCategory.General;
+                string lower = activity.ToLower();
+                if (lower.Contains("task"))          cat = LogCategory.Task;
+                else if (lower.Contains("reminder")) cat = LogCategory.Reminder;
+                else if (lower.Contains("quiz"))     cat = LogCategory.Quiz;
+                else if (lower.Contains("error") || lower.Contains("database")) cat = LogCategory.Error;
+
+                _activityLog.Add(activity, cat);
                 if (_statusLabel != null)
                     _statusLabel.Text = $"  {activity}";
                 RefreshActivityLogDisplay();
@@ -309,10 +321,25 @@ namespace CybersecurityChatbot.GUI
                 Font        = new Font("Segoe UI", 11f),
                 BorderStyle = BorderStyle.None,
                 PlaceholderText = "Type a message, cybersecurity topic, or try 'add a task to enable 2FA'...",
+                MaxLength   = 500,
             };
             _inputBox.KeyDown += InputBox_KeyDown;
 
+            _charCountLabel = new Label
+            {
+                Text = "0 / 500", Dock = DockStyle.Right, Width = 60,
+                BackColor = InputBg, ForeColor = TextMuted,
+                Font = new Font("Segoe UI", 8f), TextAlign = ContentAlignment.MiddleRight,
+            };
+            _inputBox.TextChanged += (s, e) =>
+            {
+                int len = _inputBox.Text.Length;
+                _charCountLabel.Text = $"{len} / 500";
+                _charCountLabel.ForeColor = len > 450 ? AccentYellow : TextMuted;
+            };
+
             _inputPanel.Controls.Add(_inputBox);
+            _inputPanel.Controls.Add(_charCountLabel);
             _inputPanel.Controls.Add(_sendButton);
 
             tab.Controls.Add(_chatPanel);
@@ -344,6 +371,7 @@ namespace CybersecurityChatbot.GUI
                 Location = new Point(16, 28), Width = 300,
                 PlaceholderText = "e.g. Enable two-factor authentication",
             };
+            _taskTitleInput.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; AddTaskButton_Click(null, EventArgs.Empty); } };
 
             var descLabel = new Label
             {
@@ -389,6 +417,12 @@ namespace CybersecurityChatbot.GUI
                 Location = new Point(16, 140), AutoSize = true,
             };
 
+            _taskCountLabel = new Label
+            {
+                Text = "No tasks yet", ForeColor = TextMuted, BackColor = PanelBg,
+                Font = new Font("Segoe UI", 8.5f), Location = new Point(190, 107), AutoSize = true,
+            };
+
             addPanel.Controls.Add(titleLabel);
             addPanel.Controls.Add(_taskTitleInput);
             addPanel.Controls.Add(descLabel);
@@ -396,6 +430,7 @@ namespace CybersecurityChatbot.GUI
             addPanel.Controls.Add(_taskReminderEnabled);
             addPanel.Controls.Add(_taskReminderPicker);
             addPanel.Controls.Add(_addTaskButton);
+            addPanel.Controls.Add(_taskCountLabel);
             addPanel.Controls.Add(reminderHintLabel);
 
             // ── Task list (fill) ────────────────────────────────────────────────
@@ -415,6 +450,7 @@ namespace CybersecurityChatbot.GUI
             _taskListView.Columns.Add("Description", 240);
             _taskListView.Columns.Add("Reminder", 180);
             _taskListView.Columns.Add("Created", 120);
+            _taskListView.DoubleClick += (s, e) => CompleteTaskButton_Click(null, EventArgs.Empty);
 
             // ── Action panel (bottom) ───────────────────────────────────────────
             var actionPanel = new Panel
@@ -430,6 +466,8 @@ namespace CybersecurityChatbot.GUI
             };
             _completeTaskButton.FlatAppearance.BorderSize = 0;
             _completeTaskButton.Click += CompleteTaskButton_Click;
+            var toolTip = new ToolTip { ShowAlways = true };
+            toolTip.SetToolTip(_completeTaskButton, "Mark the selected task as complete");
 
             _deleteTaskButton = new Button
             {
@@ -439,6 +477,7 @@ namespace CybersecurityChatbot.GUI
             };
             _deleteTaskButton.FlatAppearance.BorderSize = 0;
             _deleteTaskButton.Click += DeleteTaskButton_Click;
+            toolTip.SetToolTip(_deleteTaskButton, "Permanently delete the selected task");
 
             var setReminderButton = new Button
             {
@@ -448,6 +487,7 @@ namespace CybersecurityChatbot.GUI
             };
             setReminderButton.FlatAppearance.BorderSize = 0;
             setReminderButton.Click += SetReminderButton_Click;
+            toolTip.SetToolTip(setReminderButton, "Apply the date/time above as a reminder on the selected task");
 
             var refreshButton = new Button
             {
@@ -484,6 +524,14 @@ namespace CybersecurityChatbot.GUI
                 Text = "Press 'Start Quiz' to test your cybersecurity knowledge.",
             };
 
+            _quizScoreBar = new ProgressBar
+            {
+                Dock = DockStyle.Bottom, Height = 4,
+                Minimum = 0, Maximum = 100, Value = 0,
+                Style = ProgressBarStyle.Continuous,
+                ForeColor = AccentGreen, BackColor = InputBg,
+            };
+
             _quizStartButton = new Button
             {
                 Text = "▶ Start Quiz", Dock = DockStyle.Right, Width = 150,
@@ -496,6 +544,7 @@ namespace CybersecurityChatbot.GUI
 
             headerPanel.Controls.Add(_quizProgressLabel);
             headerPanel.Controls.Add(_quizStartButton);
+            headerPanel.Controls.Add(_quizScoreBar);
 
             var bodyPanel = new Panel
             {
@@ -669,6 +718,7 @@ namespace CybersecurityChatbot.GUI
 
                     _memory.UserName = _userName;
                     _nameCollected = true;
+                    Text = $"🛡 Cybersecurity Awareness Bot — Hello, {_userName}!";
 
                     await Task.Delay(400);
                     _responseHandler("Bot",
@@ -1082,6 +1132,20 @@ namespace CybersecurityChatbot.GUI
             {
                 MessageBox.Show(ex.Message, "Database error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+            // Update task counter label
+            if (_taskCountLabel != null)
+            {
+                try
+                {
+                    var all = _databaseService.GetAllTasks();
+                    int total = all.Count;
+                    int done  = all.Count(t => t.IsCompleted);
+                    _taskCountLabel.Text      = total == 0 ? "No tasks yet" : $"{done} of {total} complete";
+                    _taskCountLabel.ForeColor = done == total && total > 0 ? AccentGreen : TextMuted;
+                }
+                catch { /* silently skip counter update on DB error */ }
+            }
         }
 
         private void AddTaskButton_Click(object? sender, EventArgs e)
@@ -1206,6 +1270,7 @@ namespace CybersecurityChatbot.GUI
             _quizFeedbackLabel.Text = string.Empty;
             _quizNextButton.Visible = false;
             _quizStartButton.Text = "🔄 Restart Quiz";
+            if (_quizScoreBar != null) _quizScoreBar.Value = 0;
             RenderCurrentQuizQuestion();
             _activityLogger("Quiz started");
         }
@@ -1250,6 +1315,14 @@ namespace CybersecurityChatbot.GUI
         {
             AnswerResult result = _quizEngine.SubmitAnswer(selectedIndex);
 
+            // Update score progress bar
+            if (_quizScoreBar != null)
+            {
+                int pct = _quizEngine.TotalQuestions == 0 ? 0
+                    : (int)Math.Round(_quizEngine.Score * 100.0 / _quizEngine.TotalQuestions);
+                _quizScoreBar.Value = Math.Min(pct, 100);
+            }
+
             string feedback = result.IsCorrect
                 ? $"✅ Correct! {result.Explanation}"
                 : $"❌ Not quite. The correct answer was \"{result.CorrectAnswerText}\". {result.Explanation}";
@@ -1259,8 +1332,18 @@ namespace CybersecurityChatbot.GUI
 
             _activityLogger(result.IsCorrect ? "Quiz answer correct" : "Quiz answer incorrect");
 
+            // Highlight the clicked button green/red and disable all options
+            int btnIdx = 0;
             foreach (Control control in _quizOptionsPanel.Controls)
+            {
                 control.Enabled = false;
+                if (control is Button btn)
+                {
+                    if (btnIdx == selectedIndex)
+                        btn.BackColor = result.IsCorrect ? AccentGreen : AccentRed;
+                    btnIdx++;
+                }
+            }
 
             if (result.QuizComplete)
             {
@@ -1289,7 +1372,57 @@ namespace CybersecurityChatbot.GUI
         private void RefreshActivityLogDisplay(bool showAll = false)
         {
             if (_logDisplay == null) return;
-            _logDisplay.Text = showAll ? _activityLog.FormatFullForChat() : _activityLog.FormatForChat();
+
+            var entries = showAll ? _activityLog.GetAll() : _activityLog.GetRecent();
+            _logDisplay.Clear();
+
+            if (entries.Count == 0)
+            {
+                _logDisplay.Text = "No activity has been logged yet this session. Try adding a task or starting the quiz!";
+                return;
+            }
+
+            string header = showAll
+                ? $"📜 Full activity history ({_activityLog.TotalCount} action(s)):
+
+"
+                : $"📜 Last {entries.Count} action(s):
+
+";
+
+            AppendLogColoured(header, TextMuted);
+
+            foreach (var entry in entries)
+            {
+                Color entryColor = entry.Category switch
+                {
+                    LogCategory.Task     => AccentGreen,
+                    LogCategory.Reminder => AccentYellow,
+                    LogCategory.Quiz     => AccentBlue,
+                    LogCategory.Error    => AccentRed,
+                    _                    => TextPrimary,
+                };
+                AppendLogColoured($"  • {entry}
+", entryColor);
+            }
+
+            if (!showAll && _activityLog.HasMore)
+                AppendLogColoured($"
+  ...and {_activityLog.TotalCount - entries.Count} more. Click 'Show Full History' to see everything.
+", TextMuted);
+
+            // Auto-scroll to latest entry
+            _logDisplay.SelectionStart = _logDisplay.Text.Length;
+            _logDisplay.ScrollToCaret();
+        }
+
+        private void AppendLogColoured(string text, Color color)
+        {
+            int start = _logDisplay.TextLength;
+            _logDisplay.AppendText(text);
+            _logDisplay.Select(start, text.Length);
+            _logDisplay.SelectionColor = color;
+            _logDisplay.SelectionLength = 0;
         }
 
         // ── Chat display rendering ────────────────────────────────────────────
