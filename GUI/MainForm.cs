@@ -267,8 +267,19 @@ namespace CybersecurityChatbot.GUI
                 TextAlign = ContentAlignment.MiddleCenter,
             };
 
+            var clearChatButton = new Button
+            {
+                Text = "🗑 Clear Chat", Dock = DockStyle.Right, Width = 100,
+                BackColor = InputBg, ForeColor = TextMuted,
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 8.5f),
+                Cursor = Cursors.Hand,
+            };
+            clearChatButton.FlatAppearance.BorderSize = 0;
+            clearChatButton.Click += (s, e) => { _chatDisplay.Clear(); _activityLogger("Chat display cleared"); };
+
             _topPanel.Controls.Add(_asciiLabel);
             _topPanel.Controls.Add(_headerLabel);
+            _topPanel.Controls.Add(clearChatButton);
 
             _chatPanel = new Panel
             {
@@ -437,6 +448,58 @@ namespace CybersecurityChatbot.GUI
             addPanel.Controls.Add(_taskCountLabel);
             addPanel.Controls.Add(reminderHintLabel);
 
+            // ── Task filter ────────────────────────────────────────────────────
+            var filterBox = new TextBox
+            {
+                Dock = DockStyle.Top, Height = 28, BackColor = InputBg, ForeColor = TextPrimary,
+                BorderStyle = BorderStyle.FixedSingle, Font = new Font("Segoe UI", 9.5f),
+                PlaceholderText = "🔍  Filter tasks by title...",
+            };
+            filterBox.TextChanged += (s, e) =>
+            {
+                string filter = filterBox.Text.ToLower();
+                foreach (ListViewItem item in _taskListView.Items)
+                    item.ForeColor = item.Text == "✅" && filter.Length > 0
+                        ? TextMuted
+                        : item.ForeColor; // preserve existing colours
+                if (string.IsNullOrWhiteSpace(filter))
+                {
+                    foreach (ListViewItem item in _taskListView.Items)
+                        item.Tag = item.Tag; // no-op, show all
+                    LoadTasksIntoListView(); // full refresh when cleared
+                }
+                else
+                {
+                    foreach (ListViewItem item in _taskListView.Items)
+                    {
+                        bool match = item.SubItems.Count > 1 && item.SubItems[1].Text.ToLower().Contains(filter);
+                        item.BackColor = match ? Color.FromArgb(25, 88, 166, 255) : DarkBg;
+                    }
+                }
+            };
+
+            // ── Show completed toggle ───────────────────────────────────────────
+            var showCompletedCheck = new CheckBox
+            {
+                Text = "Show completed", ForeColor = TextMuted, BackColor = PanelBg,
+                Checked = true, Dock = DockStyle.Right, Font = new Font("Segoe UI", 8.5f),
+                Width = 130,
+            };
+            showCompletedCheck.CheckedChanged += (s, e) =>
+            {
+                foreach (ListViewItem item in _taskListView.Items)
+                {
+                    if (item.Tag is CyberTask t && t.IsCompleted)
+                        item.BackColor = showCompletedCheck.Checked ? DarkBg : Color.FromArgb(5, 255, 0, 0);
+                }
+                // Simpler: reload and skip completed if unchecked
+                LoadTasksIntoListView(showCompletedCheck.Checked);
+            };
+
+            var filterPanel = new Panel { Dock = DockStyle.Top, Height = 32, BackColor = PanelBg };
+            filterPanel.Controls.Add(filterBox);
+            filterPanel.Controls.Add(showCompletedCheck);
+
             // ── Task list (fill) ────────────────────────────────────────────────
             _taskListView = new ListView
             {
@@ -508,6 +571,7 @@ namespace CybersecurityChatbot.GUI
             actionPanel.Controls.Add(refreshButton);
 
             tab.Controls.Add(_taskListView);
+            tab.Controls.Add(filterPanel);
             tab.Controls.Add(actionPanel);
             tab.Controls.Add(addPanel);
         }
@@ -664,6 +728,11 @@ namespace CybersecurityChatbot.GUI
             AppendMessage("System", "════════════════════════════════════════════════════════", MessageType.System);
             AppendMessage("Bot", "Hello! Welcome to the Cybersecurity Awareness Bot. " +
                 "I'm here to help you stay safe online. 🛡", MessageType.BotResponse);
+
+            // Tip of the day — a proactive random tip shown on every startup
+            string tipOfDay = _responseEngine.GetDailyTip();
+            AppendMessage("Bot", $"💡 Tip of the day: {tipOfDay}", MessageType.BotTip);
+
             AppendMessage("Bot", "Before we begin — what's your name?", MessageType.BotResponse);
             _activityLogger("Waiting for user name...");
         }
@@ -1094,7 +1163,7 @@ namespace CybersecurityChatbot.GUI
 
         // ── Tasks tab event handlers ──────────────────────────────────────────
 
-        private void LoadTasksIntoListView()
+        private void LoadTasksIntoListView(bool showCompleted = true)
         {
             if (_taskListView == null) return;
 
@@ -1120,6 +1189,8 @@ namespace CybersecurityChatbot.GUI
 
                     item.SubItems.Add(task.CreatedAt.ToString("dd MMM yyyy"));
                     item.Tag = task;
+
+                    if (task.IsCompleted && !showCompleted) continue; // hidden when filter is off
 
                     if (task.IsCompleted)
                         item.ForeColor = TextMuted;

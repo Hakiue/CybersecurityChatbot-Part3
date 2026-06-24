@@ -47,6 +47,14 @@ namespace CybersecurityChatbot.ChatbotCore
             ["antivirus"] = new[] { "antivirus", "anti-virus", "anti malware", "endpoint protection" },
             ["cyberbullying"] = new[] { "cyberbullying", "online bullying", "harassment" },
             ["reporting"] = new[] { "report", "where do i report", "report cybercrime", "csirt", "saps" },
+            ["deepfake"] = new[] { "deepfake", "deep fake", "ai fake", "fake video", "synthetic media", "face swap" },
+            ["password manager"] = new[] { "password manager", "lastpass", "bitwarden", "1password", "keepass", "password vault" },
+            ["cloud security"] = new[] { "cloud", "cloud security", "google drive security", "onedrive security", "dropbox security", "cloud storage" },
+            ["iot security"] = new[] { "iot", "smart home", "smart device", "internet of things", "smart tv", "smart speaker", "ring doorbell", "connected device" },
+            ["dark web"] = new[] { "dark web", "darkweb", "dark net", "darknet", "tor browser", "illegal marketplace" },
+            ["insider threat"] = new[] { "insider threat", "disgruntled employee", "rogue employee", "internal threat", "malicious insider" },
+            ["mobile security"] = new[] { "mobile security", "smartphone security", "phone security", "android security", "iphone security", "app store", "sideload" },
+            ["crypto scam"] = new[] { "crypto scam", "cryptocurrency scam", "bitcoin scam", "fake crypto", "nft scam", "pig butchering", "crypto fraud" },
         };
 
         // Rich explanations for each topic. These are longer so the bot can explain properly.
@@ -281,6 +289,70 @@ namespace CybersecurityChatbot.ChatbotCore
                 "   • Keep evidence such as screenshots, email headers, links, phone numbers, and proof of payment.\n" +
                 "   • Do not delete evidence before reporting.\n" +
                 "   • In serious cases, report to the appropriate South African authorities or your organisation's IT/security team.",
+
+            ["deepfake"] =
+                "🎭 Deepfakes are AI-generated videos, images, or audio that make it look or sound like someone said or did something they did not.\n" +
+                "   • They are used in scams, political disinformation, and fake evidence.\n" +
+                "   • Warning signs include unnatural blinking, blurry edges around the face, mismatched lip sync, and strange lighting.\n" +
+                "   • Be sceptical of shocking videos or voice messages from public figures or people asking for money.\n" +
+                "   • Verify through official sources before sharing or acting on something unusual.\n" +
+                "   • Deepfakes are becoming harder to detect, so source verification is more important than ever.",
+
+            ["password manager"] =
+                "🗝️ A password manager stores all your passwords encrypted behind one strong master password.\n" +
+                "   • It lets you use a different, complex password for every account without needing to remember them.\n" +
+                "   • Most managers can generate strong random passwords automatically.\n" +
+                "   • Popular trusted options include Bitwarden (free and open source), 1Password, and KeePass.\n" +
+                "   • Protect your master password carefully and enable 2FA on your password manager account.\n" +
+                "   • A password manager is one of the highest-impact security habits you can build.",
+
+            ["cloud security"] =
+                "☁️ Cloud security protects data stored and processed on remote servers accessed through the internet.\n" +
+                "   • Use strong, unique passwords and 2FA on cloud accounts such as Google Drive, OneDrive, and Dropbox.\n" +
+                "   • Review sharing settings regularly — accidentally public files are a common data leak.\n" +
+                "   • Be careful about which third-party apps you grant access to your cloud accounts.\n" +
+                "   • Encrypt sensitive files before uploading if the cloud service does not offer end-to-end encryption.\n" +
+                "   • Cloud providers handle infrastructure security, but you are responsible for your own access controls and data.",
+
+            ["iot security"] =
+                "🏠 IoT (Internet of Things) devices include smart TVs, routers, doorbells, cameras, speakers, and home appliances.\n" +
+                "   • Many ship with default or weak passwords — change them immediately.\n" +
+                "   • Keep firmware updated because manufacturers patch vulnerabilities over time.\n" +
+                "   • Put smart devices on a separate guest network so they cannot access your main devices.\n" +
+                "   • Disable features you do not use, such as remote access, UPnP, or voice assistants.\n" +
+                "   • A compromised IoT device can be used as a foothold into your whole home network.",
+
+            ["dark web"] =
+                "🕷️ The dark web is a part of the internet only accessible through special browsers like Tor, not findable through normal searches.\n" +
+                "   • It is used for legitimate privacy purposes, but also hosts illegal marketplaces for stolen data, drugs, and malware.\n" +
+                "   • Your personal data from breaches is often sold on dark web marketplaces.\n" +
+                "   • You can use services like Have I Been Pwned (haveibeenpwned.com) to check if your email has appeared in known breaches.\n" +
+                "   • Most users have no reason to access the dark web, and doing so carries legal and security risks.\n" +
+                "   • If your data appears there, change affected passwords and enable 2FA immediately.",
+
+            ["insider threat"] =
+                "👤 An insider threat comes from someone inside an organisation — an employee, contractor, or partner — who misuses access intentionally or accidentally.\n" +
+                "   • Malicious insiders may steal data, leak information, sabotage systems, or commit fraud.\n" +
+                "   • Accidental insiders may cause breaches through negligence, such as sending data to the wrong person.\n" +
+                "   • Organisations reduce risk through least-privilege access, monitoring, security training, and clear policies.\n" +
+                "   • For individuals, be careful about what you share with colleagues, and follow data handling policies.\n" +
+                "   • Report suspicious behaviour through your organisation's proper channels.",
+
+            ["mobile security"] =
+                "📱 Mobile security protects smartphones and tablets from theft, malware, unauthorised access, and data loss.\n" +
+                "   • Use a strong PIN, password, or biometric lock on your device.\n" +
+                "   • Only install apps from official stores such as Google Play or the Apple App Store.\n" +
+                "   • Review app permissions — a torch app should not need access to your contacts or microphone.\n" +
+                "   • Enable remote wipe so you can erase data if your phone is lost or stolen.\n" +
+                "   • Keep the operating system and apps updated, and be cautious on public Wi-Fi.",
+
+            ["crypto scam"] =
+                "💰 Cryptocurrency scams are among the fastest-growing and hardest-to-recover-from online frauds.\n" +
+                "   • Common types include fake investment platforms, pig butchering (fake romantic relationships leading to fake crypto investments), and impersonation of exchanges.\n" +
+                "   • If someone promises guaranteed crypto returns or pressures you to invest quickly, it is a scam.\n" +
+                "   • Never send crypto to someone you have only met online or in response to an unsolicited message.\n" +
+                "   • Crypto transactions are irreversible — once sent, money is almost impossible to recover.\n" +
+                "   • Use only well-known regulated exchanges and never share wallet keys or recovery phrases with anyone.",
         };
 
         // Random tips give varied answers for the Part 2 random-response requirement.
@@ -344,6 +416,30 @@ namespace CybersecurityChatbot.ChatbotCore
                 "🛡 Combined tip: SQL injection is prevented mainly by developers, zero-days are reduced through layered defences, and patching is controlled by keeping software updated.",
                 "🛡 Combined tip: a strong system validates input, limits database permissions, monitors unusual activity, and applies security patches quickly.",
             },
+            ["deepfake"] = new List<string>
+            {
+                "🎭 Deepfake tip: if a video or voice message seems shocking or out of character, verify it through official sources before sharing.",
+                "🎭 Deepfake tip: look for unnatural blinking, blurry face edges, or lip sync that does not match the audio.",
+                "🎭 Deepfake tip: scammers use deepfake voices to impersonate executives or family members. Always verify unexpected money requests by calling back on a known number.",
+            },
+            ["password manager"] = new List<string>
+            {
+                "🗝️ Password manager tip: use Bitwarden — it is free, open source, and highly trusted by security professionals.",
+                "🗝️ Password manager tip: your master password should be a long passphrase you have memorised. Never write it down digitally.",
+                "🗝️ Password manager tip: enable 2FA on your password manager account as the highest-priority 2FA setup you do.",
+            },
+            ["mobile security"] = new List<string>
+            {
+                "📱 Mobile tip: check your app permissions regularly — remove access for apps that request more than they need.",
+                "📱 Mobile tip: enable remote wipe on your device so you can erase it if it is lost or stolen.",
+                "📱 Mobile tip: avoid charging your phone via unknown USB ports — use your own charger or a power bank.",
+            },
+            ["crypto scam"] = new List<string>
+            {
+                "💰 Crypto tip: if someone promises guaranteed returns on crypto, it is a scam. No legitimate investment guarantees profit.",
+                "💰 Crypto tip: never share your wallet recovery phrase with anyone — not even support staff from an exchange.",
+                "💰 Crypto tip: pig butchering scams build trust over weeks before asking you to invest. If an online contact brings up crypto, be very cautious.",
+            },
             ["general"] = new List<string>
             {
                 "🛡 General tip: think before you click. A few seconds of checking can prevent a serious cyber incident.",
@@ -382,7 +478,15 @@ namespace CybersecurityChatbot.ChatbotCore
                 "   • 🔒 Privacy, POPIA, and data breaches\n" +
                 "   • 🪪 Identity theft and SIM swap fraud\n" +
                 "   • 💉 SQL injection, zero-day attacks, and patching\n" +
-                "   • 📣 Reporting cybercrime and saving evidence\n\n" +
+                "   • 📣 Reporting cybercrime and saving evidence\n" +
+                "   • 🎭 Deepfakes and AI-generated fraud\n" +
+                "   • 🗝️ Password managers\n" +
+                "   • ☁️ Cloud security\n" +
+                "   • 🏠 IoT and smart home security\n" +
+                "   • 🕷️ Dark web and data breaches\n" +
+                "   • 👤 Insider threats\n" +
+                "   • 📱 Mobile security\n" +
+                "   • 💰 Cryptocurrency scams\n\n" +
                 "You can also ask: 'tell me more', 'give examples', or 'give me another tip' after a topic.",
         };
 
@@ -494,6 +598,24 @@ namespace CybersecurityChatbot.ChatbotCore
             return null;
         }
 
+        /// <summary>Returns a tip seeded by the day so it changes daily but is consistent within a session.</summary>
+        public string GetDailyTip()
+        {
+            // Pick a topic based on the day of year so it rotates daily
+            var allTopics = new[]
+            {
+                "password", "phishing", "safe browsing", "two-factor authentication", "malware",
+                "ransomware", "scams", "social engineering", "wifi security", "vpn", "privacy",
+                "data breach", "identity theft", "sim swap", "backup", "patches", "antivirus",
+                "deepfake", "password manager", "cloud security", "iot security", "mobile security", "crypto scam"
+            };
+            int idx = DateTime.Now.DayOfYear % allTopics.Length;
+            string topic = allTopics[idx];
+            if (_randomResponses.ContainsKey(topic))
+                return GetRandomFrom(topic).Replace("🛡 General tip: ", "").Replace("🎣 ", "").TrimStart();
+            return GetRandomFrom("general").Replace("🛡 General tip: ", "").TrimStart();
+        }
+
         public string GetRandomTipForTopic(string? topic)
         {
             if (topic == null) return GetRandomFrom("general");
@@ -557,6 +679,14 @@ namespace CybersecurityChatbot.ChatbotCore
             if (lower.Contains("breach")) return "data breach";
             if (lower.Contains("sim")) return "sim swap";
             if (lower.Contains("popia")) return "popia";
+            if (lower.Contains("deepfake")) return "deepfake";
+            if (lower.Contains("password manager")) return "password manager";
+            if (lower.Contains("cloud")) return "cloud security";
+            if (lower.Contains("iot") || lower.Contains("smart home")) return "iot security";
+            if (lower.Contains("dark web")) return "dark web";
+            if (lower.Contains("insider")) return "insider threat";
+            if (lower.Contains("mobile security")) return "mobile security";
+            if (lower.Contains("crypto scam") || lower.Contains("cryptocurrency")) return "crypto scam";
             return null;
         }
 
