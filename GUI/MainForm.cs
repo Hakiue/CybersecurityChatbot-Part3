@@ -355,20 +355,21 @@ namespace CybersecurityChatbot.GUI
             var addPanel = new Panel
             {
                 Dock      = DockStyle.Top,
-                Height    = 172,
+                Height    = 175,
                 BackColor = PanelBg,
-                Padding   = new Padding(16, 12, 16, 12),
+                Padding   = new Padding(0),
             };
 
+            // Row 1 — Title (left) and Description (right)
             var titleLabel = new Label
             {
                 Text = "Task title:", ForeColor = TextMuted, BackColor = PanelBg,
-                Location = new Point(16, 8), AutoSize = true,
+                Location = new Point(16, 12), AutoSize = true,
             };
             _taskTitleInput = new TextBox
             {
                 BackColor = InputBg, ForeColor = TextPrimary, BorderStyle = BorderStyle.FixedSingle,
-                Location = new Point(16, 28), Width = 300,
+                Location = new Point(16, 32), Width = 300,
                 PlaceholderText = "e.g. Enable two-factor authentication",
             };
             _taskTitleInput.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; AddTaskButton_Click(null, EventArgs.Empty); } };
@@ -376,51 +377,54 @@ namespace CybersecurityChatbot.GUI
             var descLabel = new Label
             {
                 Text = "Description (optional):", ForeColor = TextMuted, BackColor = PanelBg,
-                Location = new Point(330, 8), AutoSize = true,
+                Location = new Point(330, 12), AutoSize = true,
             };
             _taskDescriptionInput = new TextBox
             {
                 BackColor = InputBg, ForeColor = TextPrimary, BorderStyle = BorderStyle.FixedSingle,
-                Location = new Point(330, 28), Width = 300,
+                Location = new Point(330, 32), Width = 300,
                 PlaceholderText = "Add more detail...",
             };
 
+            // Row 2 — Reminder checkbox + picker
             _taskReminderEnabled = new CheckBox
             {
                 Text = "Set reminder for:", ForeColor = TextPrimary, BackColor = PanelBg,
-                Location = new Point(16, 64), AutoSize = true,
+                Location = new Point(16, 72), AutoSize = true,
             };
             _taskReminderEnabled.CheckedChanged += (s, e) => _taskReminderPicker.Enabled = _taskReminderEnabled.Checked;
 
             _taskReminderPicker = new DateTimePicker
             {
-                Location = new Point(150, 61), Width = 240,
+                Location = new Point(152, 69), Width = 240,
                 Format = DateTimePickerFormat.Custom,
                 CustomFormat = "ddd dd MMM yyyy   HH:mm",
                 Value = DateTime.Now.AddDays(1),
                 Enabled = false,
             };
 
+            // Row 3 — Add button + task counter
             _addTaskButton = new Button
             {
                 Text = "➕ Add Task", BackColor = AccentBlue, ForeColor = DarkBg,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
-                Location = new Point(16, 102), Width = 160, Height = 32, Cursor = Cursors.Hand,
+                Location = new Point(16, 110), Width = 160, Height = 32, Cursor = Cursors.Hand,
             };
             _addTaskButton.FlatAppearance.BorderSize = 0;
             _addTaskButton.Click += AddTaskButton_Click;
 
+            _taskCountLabel = new Label
+            {
+                Text = "No tasks yet", ForeColor = TextMuted, BackColor = PanelBg,
+                Font = new Font("Segoe UI", 8.5f), Location = new Point(188, 118), AutoSize = true,
+            };
+
+            // Row 4 — Hint text
             var reminderHintLabel = new Label
             {
                 Text = "Tip: select a task below and click '⏰ Set Reminder' to apply the date/time above to it too.",
                 ForeColor = TextMuted, BackColor = PanelBg, Font = new Font("Segoe UI", 8f),
-                Location = new Point(16, 140), AutoSize = true,
-            };
-
-            _taskCountLabel = new Label
-            {
-                Text = "No tasks yet", ForeColor = TextMuted, BackColor = PanelBg,
-                Font = new Font("Segoe UI", 8.5f), Location = new Point(190, 107), AutoSize = true,
+                Location = new Point(16, 150), AutoSize = true,
             };
 
             addPanel.Controls.Add(titleLabel);
