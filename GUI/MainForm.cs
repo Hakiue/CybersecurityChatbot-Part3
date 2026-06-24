@@ -1383,12 +1383,8 @@ namespace CybersecurityChatbot.GUI
             }
 
             string header = showAll
-                ? $"📜 Full activity history ({_activityLog.TotalCount} action(s)):
-
-"
-                : $"📜 Last {entries.Count} action(s):
-
-";
+                ? $"\U0001F4DC Full activity history ({_activityLog.TotalCount} action(s)):\n\n"
+                : $"\U0001F4DC Last {entries.Count} action(s):\n\n";
 
             AppendLogColoured(header, TextMuted);
 
@@ -1402,14 +1398,11 @@ namespace CybersecurityChatbot.GUI
                     LogCategory.Error    => AccentRed,
                     _                    => TextPrimary,
                 };
-                AppendLogColoured($"  • {entry}
-", entryColor);
+                AppendLogColoured($"  \u2022 {entry}\n", entryColor);
             }
 
             if (!showAll && _activityLog.HasMore)
-                AppendLogColoured($"
-  ...and {_activityLog.TotalCount - entries.Count} more. Click 'Show Full History' to see everything.
-", TextMuted);
+                AppendLogColoured($"\n  ...and {_activityLog.TotalCount - entries.Count} more. Click 'Show Full History' to see everything.\n", TextMuted);
 
             // Auto-scroll to latest entry
             _logDisplay.SelectionStart = _logDisplay.Text.Length;
