@@ -185,16 +185,16 @@ Part 3 requires a minimum of three release tags. Suggested tags for this reposit
 - **Part 1 video:** https://youtu.be/kDrrleHz-GU
 - **Part 2 (WinForms GUI):** https://github.com/Hakiue/CybersecurityChatbot-Part2
 - **Part 2 video:** https://youtu.be/6C6pwtOeXOc
-- **Part 3 (this repo):** *add link here*
-- **Part 3 video:** *add link here*
+- **Part 3 (this repo):** https://github.com/Hakiue/CybersecurityChatbot-Part3
+- **Part 3 video:** https://youtu.be/Nm7pjBscl2M
 
 ---
 
 ## 🎥 Video Presentation
 
-> 🎬 [YouTube Unlisted Link — insert here]
+> 🎬 [YouTube video](https://youtu.be/Nm7pjBscl2M)
 
-The video should be 8–10 minutes, in the student's own voice (no AI-generated voices), and walk through:
+The video covers:
 1. A quick recap of Parts 1 & 2 still working inside the Chat tab
 2. The Tasks tab — adding a task with a reminder, completing it, deleting it
 3. The Quiz tab — answering a few questions and reaching the final score
